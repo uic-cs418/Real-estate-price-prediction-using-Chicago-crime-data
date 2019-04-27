@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import csv
 
+#access token for mapbox
 mapbox_access_token = "pk.eyJ1IjoiamFja3AiLCJhIjoidGpzN0lXVSJ9.7YK6eRwUNFwd3ODZff6JvA"
 
 #Dict map betwen neighborhood and community
@@ -46,18 +47,10 @@ name_map = {'hanson park': 'belmont cragin',
             'ukrainian village': 'west town',
             'wicker park': 'west town'}
 
+#read in geojson file
 with open('chicago_communities.geojson') as f:
     geo_f = f.read()
     geojson = json.loads(geo_f)
-
-# longs = []
-# lats = []
-# for k in range(len(geojson['features'])):
-#     neighborhood_coords = np.array(geojson['features'][k]['geometry']['coordinates'][0][0])
-#     m, M = neighborhood_coords[:, 0].min(), neighborhood_coords[:, 0].max()
-#     longs.append(0.5 * (m + M))
-#     m, M = neighborhood_coords[:, 1].min(), neighborhood_coords[:, 1].max()
-#     lats.append(0.5 * (m + M))
 
 #get names of all communities in geojson
 names = [geojson['features'][k]['properties']['community'].lower() for k in range(len(geojson['features']))]
@@ -66,17 +59,6 @@ names = [geojson['features'][k]['properties']['community'].lower() for k in rang
 code_name_dict = {}
 for c in geojson['features']:
     code_name_dict[int(c['properties']['area_numbe'])] = c['properties']['community'].lower()
-
-# data = graph_objs.Data([
-#     graph_objs.Scattermapbox(
-#         lat=lats,
-#         lon=longs,
-#         mode='markers',
-#         text=names,
-#         marker=dict(size=5, color='rgb(0,0,255)'),
-#         hoverinfo='text'
-#     )
-# ])
 
 #Read in real estate file
 realestate = []
@@ -281,33 +263,6 @@ def create_re_series(com):
     fig = dict(data=data, layout=layout)
     return fig
 
-#graph_objs.Layout
-# layout = dict(
-#     height=550,
-#     autosize=True,
-#     hovermode='closest',
-#     margin = dict(r=50, l=0, t=0, b=0),
-#     mapbox=dict(
-#         layers=[
-#             dict(
-#                 sourcetype = 'geojson',
-#                 source = geojson,
-#                 type = 'fill',
-#                 color = 'rgba(163,22,19,0.2)'
-#             )
-#         ],
-#         accesstoken=mapbox_access_token,
-#         bearing=0,
-#         center=dict(
-#             lat=41.845,
-#             lon=-87.6231
-#         ),
-#         pitch=0,
-#         zoom=9,
-#         style='light'
-#     ),
-# )
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -367,6 +322,7 @@ app.layout = html.Div(children=[
         ),
 
         html.Div([
+            #Price heat map
             dcc.Graph(
                 id='realestate-heatmap',
                 figure=dict(
@@ -380,15 +336,7 @@ app.layout = html.Div(children=[
                             hoverinfo='text'
                         )
                     ]),
-                # data=[dict(
-                #     lat=lats,
-                #     lon=longs,
-                #     text=geo_names,
-                #     type='scattermapbox',
-                #     mode='markers',
-                #     hoverinfo='text',
-                #     marker=dict(size=5, color='white', opacity=0)
-                # )],
+                
                     layout=graph_objs.Layout(
                         height=450,
                         autosize=True,
@@ -410,7 +358,8 @@ app.layout = html.Div(children=[
                 ),
                 style={'width': '45%', 'display': 'inline-block'}
             ),
-
+            
+            #scatter plot crime-price
             dcc.Graph(
                 id='scatter-plot',
                 style={'float': 'right', 'display': 'inline-block', 'width': '50%'}
@@ -423,22 +372,22 @@ app.layout = html.Div(children=[
     #Crime and real estate trend
     html.Div([
         html.Div([
-            html.H5(id='crimetrend-title', children='Crime Trend in Albany Park', style={'width': '45%', 'display': 'inline-block'}),
-            html.H5(id='pricetrend-title', children='Real Estate Price Trend in Albany Park', style={'float': 'right', 'display': 'inline-block', 'width': '45%'}),
+            html.H5(id='crimetrend-title', style={'width': '45%', 'display': 'inline-block'}),
+            html.H5(id='pricetrend-title', style={'float': 'right', 'display': 'inline-block', 'width': '45%'}),
         ],
         style={'margin': '20px 50px'}
         ),
 
         html.Div([
+            #Crime time series
             dcc.Graph(
                 id='crime-timeseries',
-                figure=create_crime_series('albany park'),
                 style={'width': '45%', 'display': 'inline-block'}
             ),
 
+            #Price time series
             dcc.Graph(
                 id='re-timeseries',
-                figure=create_re_series('albany park'),
                 style={'float': 'right', 'display': 'inline-block', 'width': '50%'}
             )
         ],
@@ -457,17 +406,17 @@ def getColor(p):
     else:
         return 'rgba' + str(viridis(val))
 
-# @app.callback([Output('heatmap-title', 'children'),
-#             Output('scatter-title', 'children'),
-#             Output('realestate-heatmap', 'figure')],
-#             [Input('year-slider', 'value')])
+#Update when drag sliders or click on heat map
+#Output: price heatmap and scatter plot crime-price
 @app.callback([Output('realestate-heatmap', 'figure'),
                 Output('scatter-plot', 'figure')],
                 [Input('year-slider', 'value'),
-                Input('price-slider', 'value')])
-def update_with_sliders(year, price_range):
+                Input('price-slider', 'value'),
+                Input('realestate-heatmap', 'clickData')])
+def update_with_sliders(year, price_range, click):
 
     filtered = []
+    blackout = []
     ps = {}
     #filter community in price range
     for d in duplicate:
@@ -475,34 +424,15 @@ def update_with_sliders(year, price_range):
         if (p >= price_range[0]) & (p <= price_range[1]):
             filtered.append(d)
             ps[d] = p
-
-    #Get communities from geojson that in filtered
-    fs = []
-    for feature in geojson['features']:
-        if feature['properties']['community'].lower() in filtered:
-            fs.append(feature)
-
-    #Create geojson file that features only communities in filtered
-    g = {'type': 'FeatureCollection', 'features': fs}
-
-    #Calculate centers of communities as well as get names
-    g_longs = []
-    g_lats = []
-    g_names = []
-    for f in g['features']:
-        neighborhood_coords = np.array(f['geometry']['coordinates'][0][0])
-        m, M = neighborhood_coords[:, 0].min(), neighborhood_coords[:, 0].max()
-        g_longs.append(0.5 * (m + M))
-        m, M = neighborhood_coords[:, 1].min(), neighborhood_coords[:, 1].max()
-        g_lats.append(0.5 * (m + M))
-        g_names.append(f['properties']['community'])
+        else:
+            blackout.append(d)
 
     data=graph_objs.Data([
         graph_objs.Scattermapbox(
-            lat=g_lats,
-            lon=g_longs,
+            lat=geo_lats,
+            lon=geo_longs,
             mode='markers',
-            text=g_names,
+            text=geo_names,
             marker=dict(size=5, color='white', opacity=0.5),
             hoverinfo='text'
         )
@@ -510,14 +440,29 @@ def update_with_sliders(year, price_range):
 
     lays = []
 
-    for feature in g['features']:
-        layer = dict(
-            sourcetype='geojson',
-            source=feature,
-            type='fill',
-            color=getColor(ps[feature['properties']['community'].lower()])
-        )
-        lays.append(layer)
+    #add filtered layers
+    if (len(filtered) > 0):
+        for feature in geo['features']:
+            if feature['properties']['community'].lower() in filtered:
+                layer = dict(
+                    sourcetype='geojson',
+                    source=feature,
+                    type='fill',
+                    color=getColor(ps[feature['properties']['community'].lower()])
+                )
+                lays.append(layer)
+
+    #add blackout layers
+    if (len(blackout) > 0):
+        for feature in geo['features']:
+            if feature['properties']['community'].lower() in blackout:
+                layer = dict(
+                    sourcetype='geojson',
+                    source=feature,
+                    type='fill',
+                    color='rgba(99,99,99,0.3)'
+                )
+                lays.append(layer)
 
     layout=graph_objs.Layout(
         height=450,
@@ -540,6 +485,7 @@ def update_with_sliders(year, price_range):
 
     heatmap = dict(data=data, layout=layout)
 
+    #scatter portion for filtered data
     x = []
     y = []
     for d in filtered:
@@ -553,6 +499,7 @@ def update_with_sliders(year, price_range):
             x=x,
             y=y,
             text=filtered,
+            name='inside price range',
             mode='markers',
             marker={
                 'size': 15,
@@ -561,6 +508,59 @@ def update_with_sliders(year, price_range):
             }
         )
     ]
+
+    #scatter portion or blackout data
+    x_blackout = []
+    y_blackout = []
+
+    for d in blackout:
+        crime_count = crime_df.loc[(crime_df['year']==(ticks[year]-1)) & (crime_df['name']==d)]['count'].values[0]
+        price = re_df.loc[re_df['year']==ticks[year], d].values[0]
+        x_blackout.append(crime_count)
+        y_blackout.append(price)
+
+    data.append(
+        graph_objs.Scatter(
+            x=x_blackout,
+            y=y_blackout,
+            text=blackout,
+            name='outside price range',
+            mode='markers',
+            marker={
+                'size': 15,
+                'color': 'rgb(99,99,99)',
+                'opacity': 0.5,
+                'line': {'width': 0.5, 'color': 'white'}
+            }
+        )
+    )
+
+    #scatter portion for clicked data
+    x_hi = []
+    y_hi = []
+
+    if click is not None:
+        comm = click['points'][0]['text'].lower()
+        crime_count = crime_df.loc[(crime_df['year']==(ticks[year]-1)) & (crime_df['name']==comm)]['count'].values[0]
+        price = re_df.loc[re_df['year']==ticks[year], comm].values[0]
+        x_hi.append(crime_count)
+        y_hi.append(price)
+
+        data.append(
+            graph_objs.Scatter(
+                x=x_hi,
+                y=y_hi,
+                text=[comm],
+                name=comm,
+                mode='markers',
+                marker={
+                    'size': 15,
+                    'color': 'orange',
+                    'opacity': 0.7,
+                    'line': {'width': 0.5, 'color': 'white'}
+                }
+            )
+        )
 
     layout = graph_objs.Layout(
         xaxis={
@@ -579,66 +579,40 @@ def update_with_sliders(year, price_range):
 
     return heatmap, scatter
 
+#Update time series when click on map
+@app.callback([Output('crime-timeseries', 'figure'),
+                Output('re-timeseries', 'figure')],
+                [Input('realestate-heatmap', 'clickData')])
+def update_series(click):
 
-    #################################
+    if click is not None:
+        comm = click['points'][0]['text'].lower()
+        crime_line = create_crime_series(comm)
+        price_line = create_re_series(comm)
+        return crime_line, price_line
 
-    # data=graph_objs.Data([
-    #     graph_objs.Scattermapbox(
-    #         lat=geo_lats,
-    #         lon=geo_longs,
-    #         mode='markers',
-    #         text=geo_names,
-    #         marker=dict(size=5, color='white', opacity=0.5),
-    #         hoverinfo='text'
-    #     )
-    # ])
+    return create_crime_series('albany park'), create_re_series('albany park')
 
-    # data = [dict(
-    #     lat=geo_lats,
-    #     longs=geo_longs,
-    #     text=geo_names,
-    #     mode='markers',
-    #     type='scattermapbox',
-    #     hoverinfo='text',
-    #     marker=dict(size=8, color='white', opacity=0)
-    # )]
+#Update time series title when click on map
+@app.callback([Output('crimetrend-title', 'children'),
+                Output('pricetrend-title', 'children')],
+                [Input('realestate-heatmap', 'clickData')])
 
-    # lays = []
+def update_series_title(click):
+    crime_title = 'Crime Trend in '
+    re_title = 'Real Estate Price Trend in '
 
-    # for feature in geo['features']:
-    #     layer = dict(
-    #         sourcetype='geojson',
-    #         source=feature,
-    #         type='fill',
-    #         color=getColor(re_df.loc[re_df['year']==ticks[input], feature['properties']['community'].lower()].values[0])
-    #         # color=getColor(re_df.loc[re_df['Community']==feature['properties']['community'].lower(),ticks[input]].values[0])
-    #     )
-    #     lays.append(layer)
+    if click is not None:
+        comm = click['points'][0]['text'].lower()
+        crime_title = crime_title + comm.title()
+        re_title = re_title + comm.title()
+    else:
+        crime_title = crime_title + 'albany park'.title()
+        re_title = re_title + 'albany park'.title()
 
-    # layout=graph_objs.Layout(
-    #     height=450,
-    #     autosize=True,
-    #     hovermode='closest',
-    #     margin = dict(r=50, l=0, t=0, b=0),
-    #     mapbox=dict(
-    #         layers=lays,
-    #         accesstoken=mapbox_access_token,
-    #         style='light',
-    #         bearing=0,
-    #         center=dict(
-    #             lat=41.845,
-    #             lon=-87.6231
-    #         ),
-    #         pitch=0,
-    #         zoom=9,
-    #     )
-    # )
+    return crime_title, re_title
 
-    # fig = dict(data=data, layout=layout)
-
-    # map_title = 'Chicago Real Estate in ' + str(ticks[input])
-    # scatter_title = 'Chicago Real Estate in ' + str(ticks[input]) + ' and Crime in ' + str(ticks[input] - 1)
-
+#Update heatmap and scatter plot titles when drag year slider
 @app.callback([Output('heatmap-title', 'children'),
             Output('scatter-title', 'children')],
             [Input('year-slider', 'value')])
@@ -647,10 +621,11 @@ def update_title(input):
     scatter_title = 'Chicago Real Estate in ' + str(ticks[input]) + ' and Crime in ' + str(ticks[input] - 1)
     return map_title, scatter_title
 
+#Update price range lable when draging price range slider
 @app.callback(Output('range-label', 'children'),
                 [Input('price-slider', 'value')])
 def update_price(input):
     return 'Price between $' + str(input[0]) + ' and $' + str(input[1])
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
