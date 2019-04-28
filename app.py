@@ -405,14 +405,11 @@ def getColor(p):
     else:
         return 'rgba' + str(viridis(val))
 
-#Update when drag sliders or click on heat map
-#Output: price heatmap and scatter plot crime-price
-@app.callback([Output('realestate-heatmap', 'figure'),
-                Output('scatter-plot', 'figure')],
+#Update heatmap when dragging either the slider
+@app.callback(Output('realestate-heatmap', 'figure'),
                 [Input('year-slider', 'value'),
-                Input('price-slider', 'value'),
-                Input('realestate-heatmap', 'clickData')])
-def update_with_sliders(year, price_range, click):
+                Input('price-slider', 'value')])
+def update_heatmap(year, price_range):
 
     filtered = []
     blackout = []
@@ -483,6 +480,26 @@ def update_with_sliders(year, price_range, click):
     )
 
     heatmap = dict(data=data, layout=layout)
+    return heatmap
+
+#Update scatter plot when dragging slider or clicking on heatmap
+@app.callback(Output('scatter-plot', 'figure'),
+                [Input('year-slider', 'value'),
+                Input('price-slider', 'value'),
+                Input('realestate-heatmap', 'clickData')])
+def update_scatter(year, price_range, click):
+
+    filtered = []
+    blackout = []
+    ps = {}
+    #filter community in price range
+    for d in duplicate:
+        p = re_df.loc[re_df['year']==ticks[year], d].values[0]
+        if (p >= price_range[0]) & (p <= price_range[1]):
+            filtered.append(d)
+            ps[d] = p
+        else:
+            blackout.append(d)
 
     #scatter portion for filtered data
     x = []
@@ -575,8 +592,7 @@ def update_with_sliders(year, price_range, click):
         hovermode='closest'
     )
     scatter = dict(data=data, layout=layout)
-
-    return heatmap, scatter
+    return scatter
 
 #Update time series when click on map
 @app.callback([Output('crime-timeseries', 'figure'),
