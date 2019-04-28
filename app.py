@@ -101,10 +101,9 @@ headers = realestate[0]
 headers[0] = 'Community'
 
 #Create data frame
-re_df = pd.DataFrame(columns=headers)
-for row in realestate[1:]:
-    if row[0] in duplicate:
-        re_df = re_df.append(pd.DataFrame([row], columns=headers), ignore_index=True)
+re_df = pd.DataFrame(realestate[1:], columns=headers)
+re_df = re_df.loc[re_df['Community'].isin(duplicate),:]
+
 
 #Cast price into float
 for i in range(1, len(headers)):
