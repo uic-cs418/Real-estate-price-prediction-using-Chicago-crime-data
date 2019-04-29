@@ -43,7 +43,7 @@ if __name__ == '__main__':
 def crimeGraphDescription():
     return html.Div([
         html.H1('Crime Analysis by Year'),
-        html.P('The city of Chicago has collected crime data and and kept published it for public use.'),
+        html.P('The city of Chicago has collected crime data and kept published it for public use.'),
         html.P('What the Crime Pricers team has done is developed an interactive plot where you can select the crime'),
         html.P('types and the year you wish to display'),
         html.Strong(html.P('Directions:')),
@@ -51,7 +51,7 @@ def crimeGraphDescription():
         html.P('2. Select the year from the slider'),
         html.P('3. Hover over dots on graph to reveal information about the point'),
         html.Br()
-    ])
+    ], style={'text-align': "center"})
 
 def crimeTypes():
     types = []
