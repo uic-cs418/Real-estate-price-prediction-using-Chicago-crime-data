@@ -1,11 +1,23 @@
-from google.cloud import storage
+import pandas as pd
 
 def process_crime():
-	%%bigquery df
+	df = pd.read_csv('crime_data.csv')
+	crime_type = list(set(df['primary_type'].values))
+	codes = list(set(df['community_area'].values))
+	years = [i for i in range(2011, 2019)]
+	records = []
+	for co in codes:
+		for y in years:
+			rec = [co, y]
+			for t in crime_type:
+				count = 0
+				curr = df.loc[(df['community_area']==co) & (df['year']==y) & (df['primary_type']==t), 'count']
 
-	SELECT community_area, year, primary_type, COUNT(*) as count FROM `bigquery-public-data.chicago_crime.crime`
-	WHERE community_area IS NOT NULL AND year > 2009  AND year < 2019 AND community_area > 0 AND primary_type IS NOT NULL
-	GROUP BY community_area, year, primary_type
-	ORDER BY community_area, year, primary_type
+				if len(curr.values) != 0:
+				    count = curr.values[0]
+				    
+				rec.append(count)
 
-	return df
+			records.append(rec)
+	cols = ['community', 'year'] + crime_type
+	return pd.DataFrame(records, columns=cols)
