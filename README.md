@@ -1,15 +1,17 @@
 # cs418-project-crime-pricers
 
-##############################################
-RUN CRIME PRICERS INTERACTIVE APPLICATION
+### RUN CRIME PRICERS INTERACTIVE APPLICATION
 -------------------
 Crime Pricers application for data analysis and interaction was created
 using [Plotly Dash](https://plot.ly/dash)
 To run the application you must have the following installed/downloaded
 
 Python:
+
   python 3
+  
 python libraries:
+
      dash
      json
      plotly
@@ -18,7 +20,9 @@ python libraries:
      panda
      csv
      feather
+     
 Local files:
+
     CrimeApp directory with:
       crimepricers.py
       Preprocess_Feather.py
@@ -29,10 +33,11 @@ Local files:
     ppsf.csv
 
 Google Drive Shareable Link for local files:
-[Dataset on the Google Drive].https://drive.google.com/drive/folders/1BS6PZmcE__zm3osqLRcJre1Fz6PjuC9L?usp=sharing
+[feather file on Google Drive](https://drive.google.com/drive/folders/1BS6PZmcE__zm3osqLRcJre1Fz6PjuC9L?usp=sharing)
 
 ----------------------------------------
-to run APPLICATION
+### Using the demo
+
 go to root directory containing crimepricers.py and run command on cmd lines
 python crimepricers.py
 
