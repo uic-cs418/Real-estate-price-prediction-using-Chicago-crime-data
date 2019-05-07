@@ -4,7 +4,7 @@
 RUN CRIME PRICERS INTERACTIVE APPLICATION
 -------------------
 Crime Pricers application for data analysis and interaction was created
-using 'Plotly Dash'
+using [Plotly Dash](https://plot.ly/dash)
 To run the application you must have the following installed/downloaded
 
 Python:
@@ -29,7 +29,7 @@ Local files:
     ppsf.csv
 
 Google Drive Shareable Link for local files:
-[Dataset on the Google Drive]https://drive.google.com/drive/folders/1BS6PZmcE__zm3osqLRcJre1Fz6PjuC9L?usp=sharing
+[Dataset on the Google Drive].https://drive.google.com/drive/folders/1BS6PZmcE__zm3osqLRcJre1Fz6PjuC9L?usp=sharing
 
 ----------------------------------------
 to run APPLICATION
