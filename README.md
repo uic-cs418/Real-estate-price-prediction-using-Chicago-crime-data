@@ -26,8 +26,8 @@ python libraries:
 Local files:
 
 ```
+    crimepricers.py
     CrimeApp directory with:
-      crimepricers.py
       Preprocess_Feather.py
       Utilities.py
     CrimeData.feather
@@ -43,13 +43,14 @@ Google Drive Shareable Link for local files:
 ----------------------------------------
 ### Using the demo
 
-go to root directory containing crimepricers.py and run command on cmd lines
-python crimepricers.py
+go to root directory containing crimepricers.py and run command on cmd line
+
+> python crimepricers.py
 
 this starts a local server for Dash app
 
 NOTE: take the time to resolve any library conflicts
-then proceed to open browser with local server
+then proceed to open browser with local server ( May take a moment to load )
 
 
 ## Screenshots
