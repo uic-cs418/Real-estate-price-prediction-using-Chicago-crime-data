@@ -50,3 +50,12 @@ this starts a local server for Dash app
 
 NOTE: take the time to resolve any library conflicts
 then proceed to open browser with local server
+
+
+## Screenshots
+
+![screenshot1](cs418-project-crime-pricers
+/screenshot1.png)
+
+![screenshot2](cs418-project-crime-pricers
+/screenshot2.png)
