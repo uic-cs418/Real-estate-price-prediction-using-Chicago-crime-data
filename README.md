@@ -54,8 +54,6 @@ then proceed to open browser with local server
 
 ## Screenshots
 
-![screenshot1](cs418-project-crime-pricers
-/screenshot1.png)
+![screenshot1](images/screenshot1.png)
 
-![screenshot2](cs418-project-crime-pricers
-/screenshot2.png)
+![screenshot2](images/screenshot2.png)
