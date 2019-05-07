@@ -50,3 +50,10 @@ this starts a local server for Dash app
 
 NOTE: take the time to resolve any library conflicts
 then proceed to open browser with local server
+
+
+## Screenshots
+
+![screenshot1](images/screenshot1.png)
+
+![screenshot2](images/screenshot2.png)
