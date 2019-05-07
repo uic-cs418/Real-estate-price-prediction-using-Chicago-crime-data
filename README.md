@@ -55,6 +55,6 @@ then proceed to open browser with local server ( May take a moment to load )
 
 ## Screenshots
 
-![screenshot1](images/screenshot1.png)
+![screenshot1](app_images/crime&realEstate.PNG)
 
 ![screenshot2](images/screenshot2.png)
